@@ -4,31 +4,10 @@ metadata:
   name: "vault"
   labels:
     app.kubernetes.io/name: vault
-    vault_cr: vault
   namespace: vault-operator
 spec:
   size: 3
   image: vault:1.13.3
-
-  # Common annotations for all created resources
-  annotations:
-    common/annotation: "true"
-
-  # Vault Pods , Services and TLS Secret annotations
-  vaultAnnotations:
-    type/instance: "vault"
-
-  # Vault Configurer Pods and Services annotations
-  vaultConfigurerAnnotations:
-    type/instance: "vaultconfigurer"
-
-  # Vault Pods , Services and TLS Secret labels
-  vaultLabels:
-    vault.my_organization/log-format: "json"
-
-  # Vault Configurer Pods and Services labels
-  vaultConfigurerLabels:
-    vault.my_organization/log-format: "string"
 
   # Specify the ServiceAccount where the Vault Pod and the Bank-Vaults configurer/unsealer is running
   serviceAccount: vault
@@ -49,27 +28,11 @@ spec:
     # See: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#ingressspec-v1beta1-extensions
     spec: {}
 
-  # In some cases, you have to set permissions for the raft directory.
-  # For example in the case of using a local kind cluster, uncomment the lines below.
-  # vaultInitContainers:
-  #   - name: raft-permission
-  #     image: busybox
-  #     command:
-  #       - /bin/sh
-  #       - -c
-  #       - |
-  #         chown -R 100:1000 /vault/file
-  #     volumeMounts:
-  #       - name: vault-raft
-  #         mountPath: /vault/file
-
   # Use local disk to store Vault raft data, see config section.
   volumeClaimTemplates:
     - metadata:
         name: vault-raft
       spec:
-        # https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class-1
-        # storageClassName: ""
         accessModes:
           - ReadWriteOnce
         volumeMode: Filesystem
