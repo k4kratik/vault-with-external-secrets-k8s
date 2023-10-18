@@ -105,12 +105,12 @@ spec:
   # The repository also contains a lot examples in the deploy/ and operator/deploy directories.
   externalConfig:
     policies:
-      - name: my_org_allow_read # creating this policy for external secrets, as it only need read access
+      - name: ro_access_policy # creating this policy for external secrets, as it only need read access
         rules: path "secret/data/*" {
           capabilities = ["read"]
           }
 
-      - name: my_org_member_access
+      - name: rw_access_policy
         rules: path "secret/*" {
           capabilities = ["read", "list", "update"]
           }
@@ -164,8 +164,8 @@ spec:
           - name: k8s-one-external-secrets-role
             bound_service_account_names: ["external-secrets"]
             bound_service_account_namespaces: ["external-secrets"]
-            policies: my_org_allow_read
-            ttl: 1h
+            token_policies: ro_access_policy
+            token_max_ttl: 1h
 
       # https://www.vaultproject.io/api-docs/auth/github
       - type: github
@@ -175,8 +175,11 @@ spec:
           token_ttl: 1h
         map:
           teams:
-            GITHUB_TEAM_NAME_HERE: my_org_member_access
+            # GITHUB_TEAM_NAME_HERE: POLICY_NAME_HERE
+            DEV_RO: ro_access_policy
+            DEV_RW: rw_access_policy
           users:
+            # GITHUB_USERNAME_NAME_HERE: POLICY_NAME_HERE
             k4kratik: vault_admin
 
     secrets:
@@ -190,7 +193,7 @@ spec:
     # See https://www.vaultproject.io/docs/secrets/kv/index.html for more information.
     startupSecrets:
       - type: kv
-        path: secret/data/PROJECT_ONE/test
+        path: secret/data/TEST_PROJECT_ONE/test
         data:
           data:
             Hello: World
